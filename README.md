@@ -3,7 +3,8 @@
 
 
 Use this application to keep your files safe by encrypting them with a secure encryption algorithm with a blazingly fast execution! 
-Just select your file and enter your password & thats it .
+Just select your file and enter your password & thats it . Also don't worry about your files as it only creates an encrypted copy of your file & your file will be safe and untouched.
+
 ## How to use it?
 As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program should work without any errors.
 ##### For WINDOWS users
@@ -31,9 +32,13 @@ As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program s
 - In additional files sections choose "add files" & add these 5 files one by one: C_sharedLib.so , shield.ico , loading.gif , locked_file.png & unlocked_file.png .
 - After you have added all files hit "convert .py to .exe" button & once its finshed click on the "open output folder" & you will find your executable file there.
 
+p.s. After you run the applicaiton you can use the "verifyfiles.c" program to check if the files you have encrypted and decrypted and the original files used are same or not.
+      It checks every bit of both files to make sure there were no corruptions during encryption and decryption process.
 
 ## About this project
 This application detects how many physical cores your system has & utilizes each and every core to parallelize the encryption/decryption process. On each core an optimized x64 assembly program is running my encryption algorithm & processing your file in big chunks while communicating with front end written in python via a C wrapper. 
+
+I do not take any responsibility for any files that get corrupted, damaged  or lost due this application.
 
 You as a user would only see a very simple and easy to use interface which makes it easy to choose files for processing and also it gives the location of output files after processing is done. You can compare how well the application performed on your system  by checking the execution time and number of bytes processed that is being displayed at the bottom of the interface after the execution is done.
 
