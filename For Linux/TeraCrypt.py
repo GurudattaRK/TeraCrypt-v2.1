@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+#gcc -fPIC --shared C_sharedLib.c -o C_sharedLib.so -Wl,-Bsymbolic
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QFont, QIcon, QMovie, QPixmap
 from tkinter import filedialog
 from multiprocessing import *
@@ -7,7 +8,7 @@ from ctypes import *
 from time import *
 import threading
 import hashlib
-import fcntl                      # LINUX SPECIFIC!!
+import fcntl                    # LINUX SPECIFIC
 import sys
 import os
 
@@ -31,7 +32,9 @@ def openfile1(result_list,label2):
 
 def call(id,round,mod,blocksize,infile,outfile,key):
 
-    # print("python ID:",id)
+    print("python ID:",id)
+    print("blocksize:",blocksize)
+    print("round:",round)
     C_path= resource_path('C_sharedLib.so')
     lib = CDLL(C_path)
 
@@ -53,13 +56,15 @@ def call(id,round,mod,blocksize,infile,outfile,key):
 
         lib.main(idt,rounds,mode,content,key)
 
-        fcntl.flock(outputfile, fcntl.LOCK_EX)                      # LINUX SPECIFIC!!
+        fcntl.flock(outputfile, fcntl.LOCK_EX)                           # LINUX SPECIFIC!!
+
         outputfile.seek(id*blocksize)
 
         outputfile.write(content)
 
         # Release the lock
-        fcntl.flock(outputfile, fcntl.LOCK_UN)                      # LINUX SPECIFIC!!
+        fcntl.flock(outputfile, fcntl.LOCK_UN)                           # LINUX SPECIFIC!!
+
 
         # Close the file
         inputfile.close()
@@ -80,25 +85,24 @@ def aux(password, mode, result_list, label4, label5, label6, main_window):
     label6.setText("")
 
     cores = cpu_count()
-    # print("Logical cores:",cores)
+    print("Logical cores:",cores)
     cores = cores//2
     if (cores < 1):
         cores = 1
-    # print("Actual cores:",cores)
-
-    c= password
+    else:
+        pass
+    print("Actual cores:",cores)
     
-    # print(str(c))
+    print(str(password))
 
-    hashv= hashlib.sha3_512(str(c).encode("utf-8"))
+    hashv= hashlib.sha3_512(str(password).encode("utf-8"))
     c = hashv.digest()
     hashv= hashlib.sha3_512(str(c).encode("utf-8"))
     d = hashv.digest()
     c = c + d
-
-    # print(len(c))
+    keys = c
     
-    # print(c.hex())
+    print(c.hex())
     # label3.config(text="hash: "+str(c.hex()))
     
 
@@ -128,20 +132,55 @@ def aux(password, mode, result_list, label4, label5, label6, main_window):
     filesize= file_stat.st_size
     OGfilesize = filesize
 
-    # print("file size:",filesize)
+    print("file size:",filesize)
 
     h= filesize%128
     if(h != 0):
         v = 128-h
         filesize = filesize+v
         OGfilesize = filesize
-    # print("truncated file size:",filesize)
+    print("truncated file size:",filesize)
 
     residue=0
 
+    start= time()
+
     if ((filesize <= 10485760) or (filesize <= cores*128) ):
+
+        print("Start single core execution:")
+
         cores = 1
-        roundy = filesize//128
+        roundz = filesize//128
+
+        C_path= resource_path('C_sharedLib.so')
+        lib = CDLL(C_path)
+        # Define the C function prototype
+        lib.main.argtypes = [c_int,c_ulonglong,c_int,c_char_p,c_char_p]
+        lib.main.restype = None
+
+        idt=c_int(420)
+        roundx=c_ulonglong(roundz)
+        mod=c_int(mode)
+
+
+        inputfile = open(inputf, "rb")
+        outputfile = open(output, "r+b")
+
+
+        content = inputfile.read(filesize)
+        x=(len(content)) % 128
+        if(x != 0):
+            y= 128-x
+            content += b'\0' * y
+            
+        print("buffer length:",len(content))
+
+        lib.main(idt,roundx,mod,content,keys)
+
+        outputfile.write(content)
+
+        inputfile.close()
+        outputfile.close()
 
     else:
         residue= filesize % (128*cores)
@@ -152,62 +191,61 @@ def aux(password, mode, result_list, label4, label5, label6, main_window):
             roundy= filesize // (128*cores)
 
 
-    blocksize=  filesize//cores
-    keys= c
+        blocksize=  filesize//cores
+        keys= c
 
-    # print("start")
 
-    start= time()
+        print("Starting ",cores,"core execution:")
 
-    processes = []
-    for i in range(cores):
-        p = Process(target= call, args=(i,roundy,mode,blocksize,inputf,output,keys))
-        p.start()
-        processes.append(p)
+        processes = []
+        for i in range(cores):
+            p = Process(target= call, args=(i,roundy,mode,blocksize,inputf,output,keys))
+            p.start()
+            processes.append(p)
 
-    # Wait for child processes to finish
-    for p in processes:
-        p.join()
+        # Wait for child processes to finish
+        for p in processes:
+            p.join()
 
-    # After processing of all cores
+        # After processing of all cores
 
-    if(residue !=0):
-        roundz = residue // 128
-        offset = OGfilesize - residue
+        if((residue !=0) and (cores > 1)):
+
+            roundz = residue // 128
+            offset = OGfilesize - residue
+
+            C_path= resource_path('C_sharedLib.so')
+            lib = CDLL(C_path)
+            # Define the C function prototype
+            lib.main.argtypes = [c_int,c_ulonglong,c_int,c_char_p,c_char_p]
+            lib.main.restype = None
+
+            idt=c_int(69)
+            roundx=c_ulonglong(roundz)
+            mod=c_int(mode)
+
         
-
-        C_path= resource_path('C_sharedLib.so')
-        lib = CDLL(C_path)
-        # Define the C function prototype
-        lib.main.argtypes = [c_int,c_ulonglong,c_int,c_char_p,c_char_p]
-        lib.main.restype = None
-
-        idt=c_int(69)
-        roundx=c_ulonglong(roundz)
-        mod=c_int(mode)
-
-       
-        inputfile = open(inputf, "rb")
-        outputfile = open(output, "r+b")
+            inputfile = open(inputf, "rb")
+            outputfile = open(output, "r+b")
 
 
-        inputfile.seek(offset) 
-        content = inputfile.read(residue)
-        x=(len(content)) % 128
-        if(x != 0):
-            y= 128-x
-            content += b'\0' * y
-            
-        # print("buffer length:",len(content))
+            inputfile.seek(offset) 
+            content = inputfile.read(residue)
+            x=(len(content)) % 128
+            if(x != 0):
+                y= 128-x
+                content += b'\0' * y
+                
+            print("buffer length:",len(content))
 
-        lib.main(idt,roundx,mod,content,keys)
+            lib.main(idt,roundx,mod,content,keys)
 
-        outputfile.seek(offset)
-        outputfile.write(content)
+            outputfile.seek(offset)
+            outputfile.write(content)
 
-        inputfile.close()
-        outputfile.close()
-        
+            inputfile.close()
+            outputfile.close()
+
         
     # dll.writer(struct_addr,filename2,size,mode)'
     #remove('./sync.syncx')
@@ -217,23 +255,23 @@ def aux(password, mode, result_list, label4, label5, label6, main_window):
 
     if(mode ==0):
         main_window.show_finished_image(0)
-        msg1 ="Encryption completed!\nEncrypted file's location:\n"+str(output)
+        msg1 ="Encrypted file's location:\n"+str(output)
         msg2 ="Encrypted "+ str(OGfilesize) +" bytes in "+str(execution_time) + " seconds"
 
     else:
         main_window.show_finished_image(1)
-        msg1 ="Decryption completed!\nDecrypted file's location:\n"+str(output)
+        msg1 ="Decrypted file's location:\n"+str(output)
         msg2 ="Decrypted "+ str(OGfilesize) +" bytes in "+str(execution_time) + " seconds"
 
     label5.setText(msg1)
     label5.setAlignment(Qt.AlignCenter)
     label6.setText(msg2)
 
-    # if(mode==0):
-    #     print("File Encrypted\n",execution_time, "seconds.\n Encrypted file is saved at :\n",output)
-    # else:
-    #     print("File Decrypted\n",execution_time," seconds.\n Decrypted file is saved at :\n",output)
-    # return
+    if(mode==0):
+        print(OGfilesize,"bytes Encrypted in\n",execution_time, "seconds.\n Encrypted file is saved at :\n",output)
+    else:
+        print(OGfilesize,"bytes Decrypted in\n",execution_time," seconds.\n Decrypted file is saved at :\n",output)
+    return
 
 
 class MyWidget(QWidget):
@@ -247,7 +285,9 @@ class MyWidget(QWidget):
         self.label4.setText("")  # Clear any previous messages
         self.layout().insertWidget(8, self.loading_label)  # Insert the loading label just before label4
 
-        password = self.input_field.text()
+        password = self.password_field.text()
+        self.password_field.clear()
+
         thread = threading.Thread(target=aux, args=(password, mode, result_list, self.label4, self.label5, self.label6, self))
         thread.start()
     
@@ -270,6 +310,13 @@ class MyWidget(QWidget):
         self.label4.setPixmap(pixmap)
         self.label4.setAlignment(Qt.AlignCenter)
 
+    def toggle_password_visibility(self):
+        if self.password_field.echoMode() == QLineEdit.Password:
+            self.password_field.setEchoMode(QLineEdit.Normal)
+        else:
+            self.password_field.setEchoMode(QLineEdit.Password)
+
+
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -287,7 +334,7 @@ class MyWidget(QWidget):
         label1.setFont(QFont("Calibri", 18))
 
         button1 = QPushButton('Select file here')
-        button1.setStyleSheet("background-color: #0fee5b; color: white; padding: 10px; border-radius: 5px;")
+        button1.setStyleSheet("background-color: #3498DB; color: white; padding: 10px; border-radius: 5px;")
         button1.setFont(QFont("Calibri", 15, QFont.Bold))
         button1.clicked.connect(lambda:openfile1(result_list, self.label2))
 
@@ -310,12 +357,19 @@ class MyWidget(QWidget):
         self.label6.setStyleSheet("color: #666666; font-weight: bold;")
         self.label6.setFont(QFont("Calibri", 12))
 
-        self.input_field = QLineEdit()
-        self.input_field.setStyleSheet("background-color: #F0F0F0; border: 1px solid #BFBFBF; padding: 10px; border-radius: 5px;")
-        self.input_field.setFont(QFont("Calibri", 12))
+        self.password_field = QLineEdit()
+        self.password_field.setEchoMode(QLineEdit.Password)  # Set the echo mode to Password for masked input
+        self.password_field.setStyleSheet("background-color: #F0F0F0; border: 1px solid #BFBFBF; padding: 10px; border-radius: 5px;")
+        self.password_field.setFont(QFont("Calibri", 12))
 
+        self.show_password_button = QPushButton()
+        eye_con = resource_path('eye_con.png')
+        self.show_password_button.setIcon(QIcon(eye_con))
+        self.show_password_button.clicked.connect(self.toggle_password_visibility)
+        
+        
         button2 = QPushButton('Encrypt')
-        button2.setStyleSheet("background-color: #3498DB; color: white; padding: 10px; border-radius: 5px;")
+        button2.setStyleSheet("background-color: #0fee5b; color: white; padding: 10px; border-radius: 5px;")
         button2.setFont(QFont("Calibri", 15, QFont.Bold))
         button2.clicked.connect(lambda _: self.start_aux_thread(0))
 
@@ -324,21 +378,28 @@ class MyWidget(QWidget):
         button3.setFont(QFont("Calibri", 15, QFont.Bold))
         button3.clicked.connect(lambda _: self.start_aux_thread(1))
 
-        layout = QVBoxLayout()
-        layout.addWidget(label1)
-        layout.addWidget(button1)
-        layout.addWidget(self.label2)
-        layout.addWidget(label3)
-        layout.addWidget(self.input_field)
-        layout.addWidget(button2)
-        layout.addWidget(button3)
-        layout.addWidget(self.label4)
-        layout.addWidget(self.label5)
-        layout.addWidget(self.label6)
-        layout.setSpacing(20)
-        layout.setContentsMargins(20, 20, 20, 20)
+        vbox = QVBoxLayout()
+        hbox = QHBoxLayout()
+        hbox2 = QHBoxLayout()
 
-        self.setLayout(layout)
+        vbox.addWidget(label1)
+        vbox.addWidget(button1)
+        vbox.addWidget(self.label2)
+        vbox.addWidget(label3)
+        vbox.addLayout(hbox)
+        hbox.addWidget(self.password_field)
+        hbox.addWidget(self.show_password_button)
+        vbox.addLayout(hbox2)
+
+        hbox2.addWidget(button2)
+        hbox2.addWidget(button3)
+        vbox.addWidget(self.label4)
+        vbox.addWidget(self.label5)
+        vbox.addWidget(self.label6)
+        vbox.setSpacing(20)
+        vbox.setContentsMargins(20, 20, 20, 20)
+
+        self.setLayout(vbox)
 
 
 if __name__ == '__main__':
@@ -347,7 +408,7 @@ if __name__ == '__main__':
     result_list=[2]
     app = QApplication(sys.argv)
     widget = MyWidget()
-    widget.resize(450, 300)  # Set the width to 400 pixels and height to 300 pixels
+    widget.resize(400, 300)  # Set the width to 400 pixels and height to 300 pixels
     widget.setWindowTitle("TeraCrypt v2.0")
     widget.show()
     sys.exit(app.exec_())
