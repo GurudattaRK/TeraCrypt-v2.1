@@ -7,7 +7,7 @@ from ctypes import *
 from time import *
 import threading
 import hashlib
-import msvcrt            # WINDOWS SPECIFIC!!
+import msvcrt
 import sys
 import os
 
