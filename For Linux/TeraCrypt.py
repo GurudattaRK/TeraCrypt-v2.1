@@ -1,4 +1,4 @@
-#gcc -fPIC --shared C_sharedLib.c -o C_sharedLib.so -Wl,-Bsymbolic
+#gcc -fPIC --shared -C C_sharedLib.s -o C_sharedLib.so -Wl,-Bsymbolic
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QFont, QIcon, QMovie, QPixmap
 from tkinter import filedialog
