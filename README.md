@@ -9,9 +9,10 @@ Just select your file and enter your password & thats it . Also don't worry abou
 As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program should work without any errors.
 ##### For WINDOWS users
 - Just download the "TeraCrypt.exe" & you are ready to go!. Once its downloaded , run it & you can start encrypting your files.
+- Or you can run the "TeraCrypt_installer" to install application & then you are ready to go.
 - If for some reason the TeraCrypt.exe doesn't work for you then you can try compiling the application using others files avalaible here. Just follow the steps mentioned below.
 - You can either use the "C_sharedLib.so" or you can make one yourself by compiling the "SharedLib.c" file into a shared library using this command: 
-- gcc -fPIC --shared SharedLib.c -o C_sharedLib.so 
+- gcc -fPIC --shared -C SharedLib.s -o C_sharedLib.so 
 - You might have to pip install some python modules like PyQt5,Tkinter etc. Install them if python prompts you to.
 - Now you can directly run the python file (TeraCrypt.py) if you want .
 - Or you can convert python file into an executable file too! To do that pip install & run "auto-py-to-exe".
@@ -23,7 +24,7 @@ As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program s
 - Just download the "TeraCrypt" & make sure you give it executable permissions & then run it & you can start encrypting your files.
 - If for some reason the TeraCrypt doesn't work for you (or your distro) then you can try compiling the application using others files avalaible here. Just follow the steps mentioned below.
 - You can either use the "C_sharedLib.so" or you can make one yourself by compiling the "SharedLib.c" file into a shared library using this command: 
-- gcc -fPIC --shared SharedLib.c -o C_sharedLib.so -Wl,-Bsymbolic
+- gcc -fPIC --shared -C C_sharedLib.c -o C_sharedLib.so -Wl,-Bsymbolic
 - You might have to pip install some python modules like PyQt5,Tkinter etc. Install them if python prompts you to.
 - Now you can directly run the python file (TeraCrypt.py) if you want .
 - Or you can convert python file into an executable file too! To do that pip install & run "auto-py-to-exe".
