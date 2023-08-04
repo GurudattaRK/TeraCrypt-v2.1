@@ -8,7 +8,7 @@ Just select your file and enter your password & thats it . Also don't worry abou
 ## How to use it?
 As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program should work without any errors.
 ##### For WINDOWS users
-- Just download the "TeraCrypt.exe" & you are ready to go!. Once its downloaded , run it & you can start encrypting your files.
+- Just download the "TeraCrypt.exe" & you are ready to go! Once its downloaded , run it & you can start encrypting your files.
 - Or you can run the "TeraCrypt_installer" to install application & then you are ready to go.
 - If for some reason the TeraCrypt.exe & the installer don't work for you then you can try compiling the application using other files avalaible here. Just follow the steps mentioned below.
 - You can either use the "C_sharedLib.so" or you can make one yourself by compiling the "C_sharedLib.s" file into a shared library using this command: 
