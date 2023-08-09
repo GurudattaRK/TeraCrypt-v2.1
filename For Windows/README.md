@@ -18,3 +18,5 @@ As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program s
 - Now choose "One file" option (by default "One directory" is selected). Next choose "window based" option(by default "console based" is selected).
 - In additional files sections choose "add files" & add these 6 files one by one: C_sharedLib.so , shield.ico , eye_con.png , loading.gif , locked_file.png & unlocked_file.png .
 - After you have added all files hit "convert .py to .exe" button & once its finshed click on the "open output folder" & you will find your executable file there.
+
+p.s. After you run the applicaiton you can use the "Verify_Files.c" program to check if the files you got after encrypting & decrypting are same as the original files used. It checks every bit of the original file used & the decrypted file produced to make sure there were no corruptions during encryption and decryption process.
