@@ -1,6 +1,6 @@
 ## How to run it?
 As long as you have an INTEL or AMD CPU (x64 CPU) in your system  this program should work without any errors.
-##### There are 3 ways to run it:
+##### There are 2 ways to run it:
 #### 1. Direct install
 - Easiest way is to just download the "TeraCrypt" & make sure you give it executable permissions & then run it & then you can start encrypting your files.
 #### 2. Compiling the app yourself 
