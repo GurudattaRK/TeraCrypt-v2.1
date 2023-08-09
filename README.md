@@ -1,4 +1,4 @@
-# TeraCrypt-v2.0
+# TeraCrypt-v2.1
 #### _What's faster than an assembly program? Multithreaded Assembly! To be specific Multicore Assembly._
 
 Use this application to keep your files safe by encrypting them with a secure encryption algorithm with a blazingly fast execution! 
