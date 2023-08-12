@@ -35,12 +35,12 @@ int main()
         check = in[0]^out[0];
         if(check)
         {
-            printf("\nERROR \n\nFound at byte %llu",count);
+            printf("\nERROR \n\nFound at byte %llu \n",count);
             goto jump;
         }
         count++;
     }
-    printf("\nNO ERROR\n\n%llu bytes verified",count);
+    printf("\nNO ERROR\n\n%llu bytes verified \n",count);
     jump:
     fclose(reader);
     fclose(reader2);
