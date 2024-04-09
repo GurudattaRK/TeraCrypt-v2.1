@@ -406,7 +406,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     widget = MyWidget()
     widget.resize(400, 300)  # Set the width to 400 pixels and height to 300 pixels
-    widget.setWindowTitle("TeraCrypt v2.0")
+    widget.setWindowTitle("TeraCrypt v2.1")
     widget.show()
     sys.exit(app.exec_())
 
